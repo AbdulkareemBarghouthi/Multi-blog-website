@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <title>Sign up to blog website!</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" type="text/css" media="screen" href="main.css" />
+    <script src="main.js"></script>
+
+    <style>
+        * {
+            font-family: 'Trebuchet MS', 'Lucida Sans Unicode', 'Lucida Grande', 'Lucida Sans', Arial, sans-serif;
+        }
+        
+        input {
+            width: 90%;
+            height: 40px;
+            font-size: 30px;
+            margin-left: 10px;
+        }
+        
+        .signupBox {
+            display: grid;
+            grid-template-columns: 35% 45% 20%;
+            grid-auto-rows: 25% 25% 25% 25%;
+        }
+        
+        .signup {
+            grid-column: 2/4;
+            grid-row: 1/5;
+            width: 40%;
+        }
+        
+        p {
+            font-size: 30px;
+            margin-left: 10px;
+        }
+    </style>
+</head>
+
+<body>
+    <h1 style="text-align: center;"> Sign up here! </h1>
+    <div class="signupBox">
+        <form class="signup" method="post">
+            <label>
+            <p> Username: </p>
+            <input type="text" name="username" placeholder="Username">
+        </label>
+            <label>
+            <p> Password: </p>
+            <input type="password" name="password" placeholder="Password">
+        </label>
+            <label>
+            <p> Verify Password </p>
+            <input type="password" name="Verify" placeholder="Verify Password">
+        </label>
+            <label>
+            <p> Email (optional): </p>
+            <input type="email" name="email" placeholder="Email">
+        </label>
+            <input type="submit">
+        </form>
+    </div>
+
+</body>
+
+</html>
