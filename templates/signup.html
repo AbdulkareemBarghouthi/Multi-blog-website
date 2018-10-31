@@ -55,13 +55,20 @@
             <label>
             <p> Verify Password </p>
             <input type="password" name="Verify" placeholder="Verify Password">
+            {% if verifyError %}
+            <p style="color: red;"> {{verifyError}} </p>
+            {% endif %}
         </label>
+
             <label>
             <p> Email (optional): </p>
             <input type="email" name="email" placeholder="Email">
-        </label>
+        </label> {% if error %}
+            <p style="font-size: 10px;color:red;"> {{ error }}</p>
+            {% endif %}
             <input type="submit">
         </form>
+
     </div>
 
 </body>
