@@ -84,17 +84,13 @@ class SignUpPage(Handler, HashThings):
         elif not self.valid_username(username) or not self.valid_username(password):
             self.render("signup.html", verifyError = """invalid Input! Username or password 
                                              must have a combination of letters and numbers""")
-        # elif userExists == 0:
-        #     self.render("signup.html", verifyError = "The user already exists")
-        # else:
-        #     self.write("everything worked fine!")
 
         hashed_password = self.hash_string(password)
         hashed_username = self.secure_that_hash(username)
 
         try:
             if check.key(): 
-                self.render("signup.html", verifyError = "User already exists, unlike god and relegions and the purpose of life")
+                self.render("signup.html", verifyError = "User already exists, Try Another username")
         except:
             user = User(Username=username,
                     HashedPassword=hashed_password)
@@ -109,12 +105,12 @@ class SignUpPage(Handler, HashThings):
         
         
 class MainPage(Handler):
-    def get(self):
-        self.render("mainpage.html")  
-    
-    def post(self):
-        Retrieve all posts and display them to the main page
-        allPosts = User.all().get()
+    def get(self): 
+        # Retrieve all blog posts and post them on the main page
+        cookieHolder = self.request.cookies.get("user_id").split("|")[0]
+        allPosts = db.GqlQuery("SELECT * FROM BlogPost ORDER BY TimeUploaded DESC")
+        user = User.all().filter("Username =", cookieHolder).get()
+        self.render("mainpage.html", allPosts = allPosts , user = user)
 
 class UploadPage(Handler):
     def get(self):
@@ -123,33 +119,41 @@ class UploadPage(Handler):
     def post(self):
         title = self.request.get("title")
         content = self.request.get("content")
-
-        if not title or not content:
-            self.render("uploadpage.html", error="Make sure you have filled everything")
-        
+                    
+        if title and content:
         # Whoever logged in (Cookie holder) will own this blog post
-        cookieHolder = self.request.cookies.get('user_id').split("|")[0]
-        
+            cookieHolder = self.request.cookies.get('user_id').split("|")[0]
         # this is to create a foreign key in for the user in each of his blog posts
-        uploaderName = User.all().filter('Username =', cookieHolder).get()
-
+            uploaderName = User.all().filter('Username =', cookieHolder).get()
         # Update a blog post relating the user currently signed in
-        blogPost = BlogPost(Title = title,
-                Content = content,
-                user = uploaderName)
-        blogPost.put()
-        
-        self.redirect("/blog/" + str(blogPost.key().id()))
+            blogPost = BlogPost(Title = title,
+                                Content = content,
+                                user = uploaderName)
+            blogPost.put()
+            self.redirect("/blog/" + str(blogPost.key().id()))
+        else:
+            self.render("uploadpage.html", error="Make sure you have filled everything")
         
 class SinglePost(Handler):
     def get(self, post_id):
         key = db.Key.from_path('BlogPost', int(post_id))
         SinglePost = db.get(key)
         self.render("mainpage.html", SinglePost = SinglePost)
-        
+
+class SignOut(Handler):
+    def get(self):
+        self.response.headers.add_header('Set-cookie', 'user_id=; Path=/blog/main')
+        self.response.headers.add_header('Set-cookie', 'user_id=; Path=/blog/upload')
+        self.redirect('/blog/signup')
+
+class LoginPage(Handler, HashThings):
+    def get(self):
+        self.render("login.html")
 
 
 app = webapp2.WSGIApplication([('/blog/main', MainPage),
                             ('/blog/signup', SignUpPage),
                             ('/blog/upload', UploadPage),
-                            ('/blog/(\d+)', SinglePost)], debug=True)
+                            ('/blog/(\d+)', SinglePost),
+                            ('/blog/signout', SignOut),
+                            ('/blog/login', LoginPage)], debug=True)

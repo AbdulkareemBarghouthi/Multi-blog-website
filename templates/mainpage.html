@@ -8,18 +8,41 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <link rel="stylesheet" type="text/css" media="screen" href="main.css" />
     <script src="main.js"></script>
+    <style>
+        h1 {
+            text-align: center;
+        }
+        
+        p {
+            margin-left: 25%;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+    </style>
 </head>
 
 
 <body>
-    <h1 style="text-align: center;"> Blog Website </h1>
-    <p style="text-align: center;"> Express yourself </p>
-    <hr> {% if SinglePost %}
-    <h1>{{SinglePost.Title}}</h1>
-    <hr>
-    <p>{{SinglePost.Content}}</p>
-    <a href="/blog/main">Go Back to all Blog Posts</a> {% endif %}
-    <a href="/blog/upload" style="text-decoration: none;">Upload a blog post here</a>
+    <div class="Features">
+        <h4> Welcome {{ user.Username }} </h4>
+        <a href="/blog/signout">Sign out</a>
+    </div>
+    <div class="BlogPosts">
+        <h1 style="text-align: center;"> Blog Website </h1>
+        <p style="text-align: center; margin-left: 0;"> Express yourself </p>
+        <hr>
+        <a href="/blog/upload" style="text-decoration: none;">Upload a blog post here</a> {% if SinglePost %}
+        <h1>{{SinglePost.Title}}</h1>
+        <hr>
+        <p>{{SinglePost.Content}}</p>
+        <a href="/blog/main">Go Back to all Blog Posts</a> {% elif allPosts %} {% for item in allPosts %}
+        <h1>{{item.Title}}</h1>
+        <hr>
+        <p>{{item.Content}}</p>
+        <p><b>{{item.TimeUploaded}}</b></p>
+        {% endfor %} {% else %}
+        <h1 style="color:red;">No Posts Yet! Be the first to upload!</h1>
+        {% endif %}
+    </div>
 </body>
 
 </html>
