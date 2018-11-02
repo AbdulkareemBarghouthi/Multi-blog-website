@@ -51,6 +51,14 @@ class User(db.Model):
     Email = db.StringProperty()
     registerationDate = db.DateTimeProperty(auto_now_add = True)
 
+class BlogPost(db.Model): 
+    Title = db.StringProperty(required = True)
+    Content = db.TextProperty(required = True)
+    TimeUploaded = db.DateTimeProperty(auto_now_add = True)
+    user = db.ReferenceProperty(User,
+                                collection_name="blog_posts")
+
+
 class MainPage(Handler):
     def get(self):
         self.write("Hello, World")
@@ -67,40 +75,81 @@ class SignUpPage(Handler, HashThings):
         password = self.request.get("password")
         verify = self.request.get("Verify")
         email = self.request.get("email")
+        check = User.all().filter('Username =', username).get()
         
         if not username or not password or not verify:
             self.render("signup.html", error="Ooops, looks like there is something that you left empty!")
-        if not self.validate_password_verification(password, verify):
+        elif not self.validate_password_verification(password, verify):
             self.render("signup.html", verifyError = "The password did not match it's verification! try again")
-        if not self.valid_username(username) or not self.valid_username(password):
+        elif not self.valid_username(username) or not self.valid_username(password):
             self.render("signup.html", verifyError = """invalid Input! Username or password 
                                              must have a combination of letters and numbers""")
-        
+        # elif userExists == 0:
+        #     self.render("signup.html", verifyError = "The user already exists")
+        # else:
+        #     self.write("everything worked fine!")
+
         hashed_password = self.hash_string(password)
         hashed_username = self.secure_that_hash(username)
 
-        check = User.all()
-        something = check.filter('Username =', username)
-        if something:
-            self.render("signup.html", verifyError = "The user already exists")
-        else:
+        try:
+            if check.key(): 
+                self.render("signup.html", verifyError = "User already exists, unlike god and relegions and the purpose of life")
+        except:
             user = User(Username=username,
-                        HashedPassword=hashed_password)
+                    HashedPassword=hashed_password)
             if email:
                 user = User(Email = email)
             user.put()
-        # since users signups he's automatically logged in
-        self.response.headers.add_header('Set-cookie', 'user_id=%s; Path=/blog/main' % str(hashed_username))
-        self.redirect("/blog/main")
+            self.response.headers.add_header('Set-cookie', 'user_id=%s; Path=/blog/main' % str(hashed_username))
+            self.response.headers.add_header('Set-cookie', 'user_id=%s; Path=/blog/upload' % str(hashed_username))
+            self.redirect("/blog/main")
+            
+        # # since users signups he's automatically logged in
+        
         
 class MainPage(Handler):
     def get(self):
         self.render("mainpage.html")  
+    
+    def post(self):
+        Retrieve all posts and display them to the main page
+        allPosts = User.all().get()
 
 class UploadPage(Handler):
     def get(self):
-        self.render("uploadpage.html")     
+        self.render("uploadpage.html")
+
+    def post(self):
+        title = self.request.get("title")
+        content = self.request.get("content")
+
+        if not title or not content:
+            self.render("uploadpage.html", error="Make sure you have filled everything")
+        
+        # Whoever logged in (Cookie holder) will own this blog post
+        cookieHolder = self.request.cookies.get('user_id').split("|")[0]
+        
+        # this is to create a foreign key in for the user in each of his blog posts
+        uploaderName = User.all().filter('Username =', cookieHolder).get()
+
+        # Update a blog post relating the user currently signed in
+        blogPost = BlogPost(Title = title,
+                Content = content,
+                user = uploaderName)
+        blogPost.put()
+        
+        self.redirect("/blog/" + str(blogPost.key().id()))
+        
+class SinglePost(Handler):
+    def get(self, post_id):
+        key = db.Key.from_path('BlogPost', int(post_id))
+        SinglePost = db.get(key)
+        self.render("mainpage.html", SinglePost = SinglePost)
+        
+
 
 app = webapp2.WSGIApplication([('/blog/main', MainPage),
                             ('/blog/signup', SignUpPage),
-                            ('/blog/upload', UploadPage)], debug=True)
+                            ('/blog/upload', UploadPage),
+                            ('/blog/(\d+)', SinglePost)], debug=True)

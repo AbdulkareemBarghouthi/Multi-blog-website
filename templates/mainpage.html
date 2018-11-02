@@ -14,7 +14,12 @@
 <body>
     <h1 style="text-align: center;"> Blog Website </h1>
     <p style="text-align: center;"> Express yourself </p>
+    <hr> {% if SinglePost %}
+    <h1>{{SinglePost.Title}}</h1>
     <hr>
+    <p>{{SinglePost.Content}}</p>
+    <a href="/blog/main">Go Back to all Blog Posts</a> {% endif %}
+    <a href="/blog/upload" style="text-decoration: none;">Upload a blog post here</a>
 </body>
 
 </html>
