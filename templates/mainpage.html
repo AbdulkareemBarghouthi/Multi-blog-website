@@ -17,31 +17,55 @@
             margin-left: 25%;
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
         }
+        
+        .BlogPosts {
+            display: grid;
+            grid-template-columns: 20% 60% 20%;
+            grid-template-rows: 10% 80% 10%;
+        }
+        
+        .Features {
+            grid-column: 3/4;
+            font-size: 20px;
+            margin: 20px;
+        }
+        
+        .Posts {
+            grid-column: 2/3;
+            grid-row: 1/4;
+        }
     </style>
 </head>
 
 
 <body>
-    <div class="Features">
-        <h4> Welcome {{ user.Username }} </h4>
-        <a href="/blog/signout">Sign out</a>
-    </div>
     <div class="BlogPosts">
-        <h1 style="text-align: center;"> Blog Website </h1>
-        <p style="text-align: center; margin-left: 0;"> Express yourself </p>
-        <hr>
-        <a href="/blog/upload" style="text-decoration: none;">Upload a blog post here</a> {% if SinglePost %}
-        <h1>{{SinglePost.Title}}</h1>
-        <hr>
-        <p>{{SinglePost.Content}}</p>
-        <a href="/blog/main">Go Back to all Blog Posts</a> {% elif allPosts %} {% for item in allPosts %}
-        <h1>{{item.Title}}</h1>
-        <hr>
-        <p>{{item.Content}}</p>
-        <p><b>{{item.TimeUploaded}}</b></p>
-        {% endfor %} {% else %}
-        <h1 style="color:red;">No Posts Yet! Be the first to upload!</h1>
+        {% if user %}
+        <h4 style="font-size:20px;"> Welcome {{ user.Username }} </h4>
         {% endif %}
+        <div class="Features">
+            <a href="/blog/upload" style="text-decoration: none;">Upload a blog post here</a>
+            <a href="/blog/signout">Sign out</a>
+        </div>
+        <div class="Posts">
+            <h1 style="text-align: center;"> Blog Website </h1>
+            <p style="text-align: center; margin-left: 0;"> Express yourself </p>
+            {% if SinglePost %}
+            <h1>{{SinglePost.Title}}</h1>
+            <hr>
+            <p>{{SinglePost.Content}}</p>
+            <a href="/blog/main">Go Back to all Blog Posts</a> {% elif allPosts %}
+            <h1>All Posts</h1>
+            {% for item in allPosts %}
+            <h1>{{item.Title}}</h1>
+            <hr>
+            <p>{{item.Content}}</p>
+            <p><b>{{item.TimeUploaded}}</b></p>
+            {% endfor %} {% else %}
+            <h1 style="color:red;">No Posts Yet! Be the first to upload!</h1>
+            {% endif %}
+        </div>
+
     </div>
 </body>
 

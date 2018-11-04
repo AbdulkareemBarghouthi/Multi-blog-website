@@ -37,6 +37,11 @@
             font-size: 30px;
             margin-left: 10px;
         }
+        
+        .feature {
+            grid-row: 5/6;
+            grid-column: 2/4;
+        }
     </style>
 </head>
 
@@ -66,10 +71,14 @@
         </label> {% if error %}
             <p style="font-size: 10px;color:red;"> {{ error }}</p>
             {% endif %}
+            <br>
+            <br>
             <input type="submit">
         </form>
-        <h4 style="color:blue;">Already have an account?</h4>
-        <a href="/blog/login">Login Here</a>
+        <div class="feature">
+            <h4 style="color:blue;">Already have an account?</h4>
+            <a href="/blog/login">Login Here</a>
+        </div>
 
     </div>
 

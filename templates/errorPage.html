@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Sorry!</title>
+    <style>
+        body {
+            display: grid;
+            grid-template-columns: 20% 60% 20%;
+        }
+        
+        .error {
+            grid-column: 2/3;
+        }
+        
+        a {
+            margin-left: 40%;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="error">
+        <h1 style="text-align: center;">{{error}}</h1>
+        <br>
+        <a href="/blog/signup">Sign up or Login</a>
+    </div>
+</body>
+
+</html>
