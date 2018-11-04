@@ -6,13 +6,14 @@ import random
 import string
 import hashlib
 
-import _const
+
 
 from google.appengine.ext import db 
 template_dir = os.path.join(os.path.dirname(__file__), 'templates')
 jinja_env = jinja2.Environment(loader = jinja2.FileSystemLoader(template_dir), autoescape= True)
 
 salt = "Rainbows"
+
 
 class HashThings():
     def hash_string(self, s):
@@ -92,8 +93,7 @@ class SignUpPage(Handler, HashThings):
             if email:
                 user = User(Email = email)
             user.put()
-            self.response.headers.add_header('Set-cookie', 'user_id=%s; Path=/blog/main' % str(hashed_username))
-            self.response.headers.add_header('Set-cookie', 'user_id=%s; Path=/blog/upload' % str(hashed_username))
+            self.response.headers.add_header('Set-cookie', 'user_id=%s; Path=/' % str(hashed_username))
             self.redirect("/blog/main")
             
         # # since users signups he's automatically logged in
@@ -112,29 +112,31 @@ class MainPage(Handler):
 
 class UploadPage(Handler):
     def get(self):
-        self.render("uploadpage.html")
-
-    def post(self):
-        title = self.request.get("title")
-        content = self.request.get("content")
         cookieCheck = self.request.cookies.get("user_id")
 
         if not cookieCheck:
             self.render("errorPage.html", error = "You cannot upload a post without signing in")
         else:
-            if title and content:
+            self.render("uploadpage.html")
+
+    def post(self):
+        title = self.request.get("title")
+        content = self.request.get("content")
+
+        
+        if title and content:
         # Whoever logged in (Cookie holder) will own this blog post
-                cookieHolder = self.request.cookies.get('user_id').split("|")[0]
+            cookieHolder = self.request.cookies.get('user_id').split("|")[0]
         # this is to create a foreign key in for the user in each of his blog posts
-                uploaderName = User.all().filter('Username =', cookieHolder).get()
+            uploaderName = User.all().filter('Username =', cookieHolder).get()
         # Update a blog post relating the user currently signed in
-                blogPost = BlogPost(Title = title,
+            blogPost = BlogPost(Title = title,
                                 Content = content,
                                 user = uploaderName)
-                blogPost.put()
-                self.redirect("/blog/" + str(blogPost.key().id()))
-            else:
-                self.render("uploadpage.html", error="Make sure you have filled everything")
+            blogPost.put()
+            self.redirect("/blog/" + str(blogPost.key().id()))
+        else:
+            self.render("uploadpage.html", error="Make sure you have filled everything")
         
 class SinglePost(Handler):
     def get(self, post_id):
@@ -144,8 +146,7 @@ class SinglePost(Handler):
 
 class SignOut(Handler):
     def get(self):
-        self.response.headers.add_header('Set-cookie', 'user_id=%s; Path=/blog/main' % None)
-        self.response.headers.add_header('Set-cookie', 'user_id=%s; Path=/blog/upload' % None)
+        self.response.headers.add_header('Set-cookie', 'user_id=; Path=/')
         self.redirect('/blog/signup')
 
 class LoginPage(Handler, HashThings):
@@ -171,8 +172,7 @@ class LoginPage(Handler, HashThings):
         if user:
             if self.hash_string(password) == user.HashedPassword:
                 self.redirect('/blog/main')
-                self.response.headers.add_header('Set-Cookie', 'user_id=%s; Path=/blog/main' % str(self.secure_that_hash(username))) 
-                self.response.headers.add_header('Set-Cookie', 'user_id=%s; Path=/blog/upload' % str(self.secure_that_hash(username)))
+                self.response.headers.add_header('Set-Cookie', 'user_id=%s; Path=/' % str(self.secure_that_hash(username))) 
             else:
                 self.render("login.html", error="Wrong password! Try Again")
         else:
@@ -183,11 +183,37 @@ class LoginPage(Handler, HashThings):
 class deleteUsers(Handler):
     def get(self):
         users = User.all()
+        posts = BlogPost.all()
         for item in users:
             item.delete()
         self.write("users deleted")
         for item in users:
             self.write(item.key().id())
+        for item in posts:
+            item.delete()
+
+class deletePost(Handler):
+    def get(self, post_id):
+        cookieHolder = self.request.cookies.get("user_id").split("|")[0]
+        key = db.Key.from_path('BlogPost', int(post_id))
+        post = db.get(key)
+        if cookieHolder != post.user.Username:
+            self.render("EditDelete.html", ack="You are not Authorized to delete this post")
+        else:
+            post.delete()
+            self.render("EditDelete.html", ack = "Post Deleted!")
+
+class editPost(Handler):
+    def get(self, post_id):
+        cookieHolder = self.request.cookies.get("user_id").split("|")[0]
+        key = db.Key.from_path('BlogPost', int(post_id))
+        post = db.get(key)
+        if cookieHolder != post.user.Username:
+            self.render("EditDelete.html", ack="You not authorized to edit this post!")
+    
+    def post(self, post_id):
+        key = db.Key.from_path('BlogPost', int(post_id))
+        post = db.get(key)
 
 app = webapp2.WSGIApplication([('/blog/main', MainPage),
                             ('/blog/signup', SignUpPage),
@@ -195,4 +221,6 @@ app = webapp2.WSGIApplication([('/blog/main', MainPage),
                             ('/blog/(\d+)', SinglePost),
                             ('/blog/signout', SignOut),
                             ('/blog/login', LoginPage),
-                            ('/blog/delete', deleteUsers)], debug=True)
+                            ('/blog/delete', deleteUsers),
+                            ('/blog/delete/(\d+)', deletePost),
+                            ('/blog/edit/(\d+)', editPost)], debug=True)

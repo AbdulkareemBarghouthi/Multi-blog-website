@@ -39,6 +39,9 @@
 
 
 <body>
+    {% if ack %}
+    <p style="color:red;">{{ack}}</p>
+    {% endif%}
     <div class="BlogPosts">
         {% if user %}
         <h4 style="font-size:20px;"> Welcome {{ user.Username }} </h4>
@@ -61,7 +64,9 @@
             <hr>
             <p>{{item.Content}}</p>
             <p><b>{{item.TimeUploaded}}</b></p>
-            {% endfor %} {% else %}
+            <p><b>Uploaded by {{item.user.Username}}</b></p>
+            <a href="/blog/delete/{{item.key().id()}}">Delete</a>
+            <a href="/blog/edit/{{item.key().id()}}">Edit</a> {% endfor %} {% else %}
             <h1 style="color:red;">No Posts Yet! Be the first to upload!</h1>
             {% endif %}
         </div>
