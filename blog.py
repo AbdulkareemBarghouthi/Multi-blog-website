@@ -50,6 +50,7 @@ class User(db.Model):
 class BlogPost(db.Model): 
     Title = db.StringProperty(required = True)
     Content = db.TextProperty(required = True)
+    Comments = db.ListProperty(basestring)
     TimeUploaded = db.DateTimeProperty(auto_now_add = True)
     user = db.ReferenceProperty(User,
                                 collection_name="blog_posts")
@@ -210,11 +211,38 @@ class editPost(Handler):
         post = db.get(key)
         if cookieHolder != post.user.Username:
             self.render("EditDelete.html", ack="You not authorized to edit this post!")
+        else:
+            self.render ("EditPage.html", post = post)
     
     def post(self, post_id):
+        newTitle = self.request.get("title")
+        newContent = self.request.get("content")
+        
         key = db.Key.from_path('BlogPost', int(post_id))
         post = db.get(key)
+        post.Title = newTitle
+        post.Content = newContent
+        post.put()
+        self.render("EditDelete.html", ack="Post edited successfully")
 
+class commentPage(Handler):
+    def get(self, post_id):
+        cookieHolder = self.request.cookies.get("user_id").split("|")[0]        
+        key = db.Key.from_path('BlogPost', int(post_id))
+        post = db.get(key)
+        if cookieHolder == post.user.Username:
+            self.render("EditDelete.html", ack="You cannot comment on your own post")
+        else:
+            self.render("comments.html")
+    
+    def post(self, post_id):
+        comment = self.request.get("comment")
+        key = db.Key.from_path('BlogPost', int(post_id))
+        post = db.get(key)
+        post.Comments.append(comment)
+        post.put()
+        self.render("EditDelete.html", ack="Comment Uploaded")
+    
 app = webapp2.WSGIApplication([('/blog/main', MainPage),
                             ('/blog/signup', SignUpPage),
                             ('/blog/upload', UploadPage),
@@ -223,4 +251,5 @@ app = webapp2.WSGIApplication([('/blog/main', MainPage),
                             ('/blog/login', LoginPage),
                             ('/blog/delete', deleteUsers),
                             ('/blog/delete/(\d+)', deletePost),
-                            ('/blog/edit/(\d+)', editPost)], debug=True)
+                            ('/blog/edit/(\d+)', editPost),
+                            ('/blog/comment/(\d+)', commentPage)], debug=True)

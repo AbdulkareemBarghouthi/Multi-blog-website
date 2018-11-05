@@ -66,7 +66,13 @@
             <p><b>{{item.TimeUploaded}}</b></p>
             <p><b>Uploaded by {{item.user.Username}}</b></p>
             <a href="/blog/delete/{{item.key().id()}}">Delete</a>
-            <a href="/blog/edit/{{item.key().id()}}">Edit</a> {% endfor %} {% else %}
+            <a href="/blog/edit/{{item.key().id()}}">Edit</a>
+            <a href="/blog/comment/{{item.key().id()}}">Comment</a>
+            <hr> {% if item.Comments %}
+            <p> Comments </p>
+            {% for item in item.Comments %}
+            <p>{{item}}</p>
+            {% endfor %} {% endif %} {% endfor %} {% else %}
             <h1 style="color:red;">No Posts Yet! Be the first to upload!</h1>
             {% endif %}
         </div>
