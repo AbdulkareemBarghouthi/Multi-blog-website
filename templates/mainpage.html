@@ -57,6 +57,11 @@
             <h1>{{SinglePost.Title}}</h1>
             <hr>
             <p>{{SinglePost.Content}}</p>
+            {% if SinglePost.Comments %}
+            <p><b>Comments:</b></p>
+            {% for item in SinglePost.Comments%}
+            <p>{{item}}</p>
+            {% endfor %} {% endif %}
             <a href="/blog/main">Go Back to all Blog Posts</a> {% elif allPosts %}
             <h1>All Posts</h1>
             {% for item in allPosts %}
@@ -65,11 +70,17 @@
             <p>{{item.Content}}</p>
             <p><b>{{item.TimeUploaded}}</b></p>
             <p><b>Uploaded by {{item.user.Username}}</b></p>
+            <p>Likes: {{item.Likes}}</p>
+            <p>Dislikes: {{item.Dislikes}}</p>
+
             <a href="/blog/delete/{{item.key().id()}}">Delete</a>
             <a href="/blog/edit/{{item.key().id()}}">Edit</a>
             <a href="/blog/comment/{{item.key().id()}}">Comment</a>
+            <a href="/blog/{{item.key().id()}}">Go to Post</a>
+            <a href="/blog/like/{{item.key().id()}}">Like</a>
+            <a href="/blog/dislike/{{item.key().id()}}">Dislike</a>
             <hr> {% if item.Comments %}
-            <p> Comments </p>
+            <p><b> Comments: </b></p>
             {% for item in item.Comments %}
             <p>{{item}}</p>
             {% endfor %} {% endif %} {% endfor %} {% else %}
