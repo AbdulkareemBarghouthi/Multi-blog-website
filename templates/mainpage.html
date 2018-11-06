@@ -1,7 +1,9 @@
+{% extends "base.html" %}
 <!DOCTYPE html>
 <html>
 
 <head>
+    {% block content %}
     <meta charset="utf-8" />
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <title>Blog Website</title>
@@ -51,8 +53,6 @@
             <a href="/blog/signout">Sign out</a>
         </div>
         <div class="Posts">
-            <h1 style="text-align: center;"> Blog Website </h1>
-            <p style="text-align: center; margin-left: 0;"> Express yourself </p>
             {% if SinglePost %}
             <h1>{{SinglePost.Title}}</h1>
             <hr>
@@ -89,6 +89,7 @@
         </div>
 
     </div>
+    {% endblock %}
 </body>
 
 </html>
