@@ -1,8 +1,10 @@
+{% extends "base.html" %}
 <!DOCTYPE html>
 <html>
 
 <head>
     <title>Edit your post</title>
+    {% block content %}
     <style>
         * {
             font-family: 'Trebuchet MS', 'Lucida Sans Unicode', 'Lucida Grande', 'Lucida Sans', Arial, sans-serif;
@@ -30,6 +32,10 @@
             width: 100%;
             height: 350px;
         }
+        
+        .cancelEdit {
+            grid-column: 2/4;
+        }
     </style>
 </head>
 
@@ -52,7 +58,9 @@
             </label>
             <input type="submit">
         </form>
+        <a href="/blog/main" class="cancelEdit">Cancel</a>
     </div>
 </body>
+{% endblock %}
 
 </html>

@@ -1,20 +1,36 @@
+{% extends "base.html" %}
 <!DOCTYPE html>
 <html>
 
 <head>
     <title>Comment Page</title>
-
+    {% block content %}
+    <style>
+        textarea {
+            margin-left: 30%;
+            width: 50%;
+            height: 150px;
+        }
+        
+        input[type="submit"] {
+            margin-left: 30%;
+            width: 80px;
+            height: 48px;
+        }
+    </style>
 </head>
 
 <body>
     <form method="post">
         <div class="commentBox">
-            <h1> What would you like to comment?</h1>
-            <textarea name="comment"></textarea>
+            <h1 style="text-align: center;"> What would you like to comment?</h1>
+            <textarea name="comment"></textarea><br>
             <input type="submit">
+            <a href="/blog/main">Cancel</a>
         </div>
     </form>
 
 </body>
+{% endblock %}
 
 </html>

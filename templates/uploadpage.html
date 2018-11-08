@@ -1,3 +1,4 @@
+{% extends "base.html" %}
 <!DOCTYPE html>
 <html>
 
@@ -5,8 +6,7 @@
     <meta charset="utf-8" />
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <title>Upload a blog post</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-
+    <meta name="viewport" content="width=device-width, initial-scale=1"> {% block content %}
     <style>
         * {
             font-family: 'Trebuchet MS', 'Lucida Sans Unicode', 'Lucida Grande', 'Lucida Sans', Arial, sans-serif;
@@ -53,8 +53,10 @@
             <textarea name="content"></textarea>
         </label>
             <input type="submit">
+            <a href="/blog/main">Cancel</a>
         </form>
     </div>
 </body>
+{% endblock %}
 
 </html>
