@@ -150,6 +150,11 @@ class UploadPage(Handler):
             self.render("uploadpage.html")
 
     def post(self):
+        cookieCheck = self.request.cookies.get("user_id")
+        if not cookieCheck:
+            self.render("errorPage.html", error="""you cannot upload
+                                                a post without signing in""")
+            return
         title = self.request.get("title")
         content = self.request.get("content")
 
@@ -268,11 +273,21 @@ class editPost(Handler):
     def post(self, post_id):
         # Take user's input from the http header
         # then update the entity with user's new edit
+        cookieHolder = self.request.cookies.get("user_id")
+        key = db.Key.from_path('BlogPost', int(post_id))
+        post = db.get(key)
+        if cookieHolder is None:
+            self.redirect("/blog/login")
+            return
+
+        if (cookieHolder.split("|")[0] !=
+                post.user.Username):
+                self.render("EditDelete.html", ack="""You not authorized
+                                                to edit this post!""")
+                return
         newTitle = self.request.get("title")
         newContent = self.request.get("content")
 
-        key = db.Key.from_path('BlogPost', int(post_id))
-        post = db.get(key)
         post.Title = newTitle
         post.Content = newContent
         post.put()
@@ -296,6 +311,20 @@ class commentPage(Handler):
     def post(self, post_id):
         # Create a comment then add it to the foreign key
         # of blogPost entity
+        cookieHolder = self.request.cookies.get("user_id")
+        key = db.Key.from_path('BlogPost', int(post_id))
+        post = db.get(key)
+
+        if cookieHolder is None:
+            self.redirect("/blog/login")
+            return
+
+        if (cookieHolder.split("|")[0] ==
+                post.user.Username):
+                self.render("EditDelete.html", ack="""You cannot comment
+                                                   on your own post""")
+                return
+
         comment = self.request.get("comment")
         key = db.Key.from_path('BlogPost', int(post_id))
         post = db.get(key)

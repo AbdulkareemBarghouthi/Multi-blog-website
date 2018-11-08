@@ -1,4 +1,4 @@
-{% extend "base.html" %}
+{% extends "base.html" %}
 <!DOCTYPE html>
 <html>
 
@@ -6,18 +6,7 @@
     <title>Sorry!</title>
     {% block content %}
     <style>
-        body {
-            display: grid;
-            grid-template-columns: 20% 60% 20%;
-        }
-        
-        .error {
-            grid-column: 2/3;
-        }
-        
-        a {
-            margin-left: 40%;
-        }
+
     </style>
 </head>
 
@@ -26,7 +15,7 @@
         <h1 style="text-align: center;">{{error}}</h1>
         <br>
         <a href="/blog/signup">Sign up or Login</a>
-        <a href="/blog/main/">Or go to main page</a>
+        <a href="/blog/main">Or go to main page</a>
     </div>
 </body>
 {% endblock %}
