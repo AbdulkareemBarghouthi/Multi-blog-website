@@ -14,7 +14,8 @@ jinja_env = jinja2.Environment(loader=jinja2.FileSystemLoader(template_dir),
 
 salt = "Rainbows"
 
-# A class the includes one of the most used 
+
+# A class the includes one of the most used
 # hash functions throughout the code
 class HashThings():
     def hash_string(self, s):
@@ -23,8 +24,9 @@ class HashThings():
     def secure_that_hash(self, username):
         return "%s|%s" % (username, self.hash_string(username))
 
+
 # This class was copied from udacity
-# basically it really helps in rendering pages 
+# basically it really helps in rendering pages
 class Handler(webapp2.RequestHandler):
     def write(self, *a, **kw):
         self.response.out.write(*a, **kw)
@@ -45,8 +47,8 @@ class Handler(webapp2.RequestHandler):
         return USER_RE.match(username)
 
 
-# This class instantiates and creates an entity 
-# in the google cloud store, this entity represents 
+# This class instantiates and creates an entity
+# in the google cloud store, this entity represents
 # the logged in users and the users that use the website
 class User(db.Model):
     Username = db.StringProperty(required=True)
@@ -55,22 +57,25 @@ class User(db.Model):
     registerationDate = db.DateTimeProperty(auto_now_add=True)
 
 
-# This class instantiates and creates an entity 
-# in the google cloud store, this entity represents 
+# This class instantiates and creates an entity
+# in the google cloud store, this entity represents
 # the posts uploaded by the users
 class BlogPost(db.Model):
     Title = db.StringProperty(required=True)
     Content = db.TextProperty(required=True)
     Comments = db.ListProperty(basestring)
+    UsersLikes = []
+    UsersDislikes = []
     Likes = db.IntegerProperty(0)
     Dislikes = db.IntegerProperty(0)
     TimeUploaded = db.DateTimeProperty(auto_now_add=True)
     user = db.ReferenceProperty(User,
                                 collection_name="blog_posts")
 
-# This class basically handles all signup functionalities 
-# from storing the user to prompting him to the main 
-# page, this also includes all exceptions that might 
+
+# This class basically handles all signup functionalities
+# from storing the user to prompting him to the main
+# page, this also includes all exceptions that might
 # let the user do any unautherized actions
 class SignUpPage(Handler, HashThings):
     def get(self):
@@ -84,20 +89,26 @@ class SignUpPage(Handler, HashThings):
         email = self.request.get("email")
         check = User.all().filter('Username =', username).get()
 
-        # If statements that ensures that the user entered right input
-        # , first if statement ensures that the user won't leave field empty
-        # , second else if validates if the password and the verify fields match
-        # , third if else makes sure that the user entered valid usernames and 
-        # password policies 
+        # If statements that ensures
+        # that the user enteredright input
+        # , first if statement ensures that the
+        # user won't leave field empty
+        # , second else if validates if
+        # the password and the verify fields match
+        # , third if else makes sure that the user
+        #  entered valid usernames and
+        # password policies
         if (not username or not password or not verify):
             self.render("signup.html", error="""Ooops, looks like there
                         is something that you left empty!""")
         elif (not self.validate_password_verification(password, verify)):
-            self.render("signup.html", verifyError="""The password did not match
+            self.render("signup.html", verifyError="""The password did
+                        not match
                         it's verification! try again""")
         elif (not self.valid_username(username) or
               not self.valid_username(password)):
-            self.render("signup.html", verifyError="""invalid Input! Username or password
+            self.render("signup.html", verifyError="""invalid Input!
+                                             Username or password
                                              must have a combination
                                              of letters and numbers""")
 
@@ -168,6 +179,8 @@ class UploadPage(Handler):
             blogPost = BlogPost(Title=title,
                                 Content=content,
                                 user=uploaderName,
+                                UsersLikes=[],
+                                UsersDislikes=[],
                                 Likes=0,
                                 Dislikes=0)
             blogPost.put()
@@ -178,7 +191,7 @@ class UploadPage(Handler):
 
 
 class SinglePost(Handler):
-    # Retrieve a single post after uploading or requesting 
+    # Retrieve a single post after uploading or requesting
     #  to enter the post itself
     def get(self, post_id):
         key = db.Key.from_path('BlogPost', int(post_id))
@@ -207,7 +220,7 @@ class LoginPage(Handler, HashThings):
         username = self.request.get("username")
         password = self.request.get("password")
 
-        # Hash the passwords and secure them 
+        # Hash the passwords and secure them
         # , store a cookie for the user
         hashed = self.secure_that_hash(username)
         hashed_cookie = self.request.cookies.get("user_id")
@@ -217,15 +230,15 @@ class LoginPage(Handler, HashThings):
             self.render("login.html", error="Please fill in all credentials!")
             return
 
-        # if there exists a cookie then redirect to main page 
+        # if there exists a cookie then redirect to main page
         # , in summary make sure a cookie was created
         if (hashed_cookie is not None):
             self.redirect('/blog/main')
 
         user = User.all().filter("Username =", username).get()
 
-        # Handle the possibility of the user not being retrieved 
-        # then make sure that the password matches the hash and 
+        # Handle the possibility of the user not being retrieved
+        # then make sure that the password matches the hash and
         # grant access to the user, also handle if the user exists or not
         if user:
             if (self.hash_string(password) == user.HashedPassword):
@@ -247,6 +260,9 @@ class deletePost(Handler):
         cookieHolder = self.request.cookies.get("user_id").split("|")[0]
         key = db.Key.from_path('BlogPost', int(post_id))
         post = db.get(key)
+        if not post:
+            self.redirect("/blog/login")
+            return
         if (cookieHolder !=
                 post.user.Username):
             self.render("EditDelete.html", ack="""You are not Authorized
@@ -257,7 +273,7 @@ class deletePost(Handler):
 
 
 class editPost(Handler):
-    # Make sure that the logged in user owns the post and 
+    # Make sure that the logged in user owns the post and
     # give him the priviledge to edit the post
     def get(self, post_id):
         cookieHolder = self.request.cookies.get("user_id").split("|")[0]
@@ -335,7 +351,7 @@ class commentPage(Handler):
 
 class likeFunction(Handler):
     # Iterate the likes in the users entity and make sure
-    # that the user doesn't like his own post 
+    # that the user doesn't like his own post
     def get(self, post_id):
         allPosts = BlogPost.all()
         cookieHolder = self.request.cookies.get("user_id").split("|")[0]
@@ -345,6 +361,11 @@ class likeFunction(Handler):
             self.render("mainpage.html", allPosts=allPosts,
                         ack="you can't like your own post")
         else:
+            if cookieHolder in BlogPost.UsersLikes:
+                self.render("errorPage.html", error="""you cannot like
+                                                    a post more than once""")
+                return
+            BlogPost.UsersLikes.append(cookieHolder)
             post.Likes += 1
             post.put()
             self.render("mainpage.html", allPosts=allPosts)
@@ -362,6 +383,11 @@ class dislikeFunction(Handler):
             self.render("mainpage.html", allPosts=allPosts,
                         ack="you can't dislike your own post")
         else:
+            if cookieHolder in BlogPost.UsersDislikes:
+                self.render("errorPage.html", error="""You cannot dislike
+                                                    a post more than once""")
+                return
+            BlogPost.UsersDislikes.append(cookieHolder)
             post.Dislikes += 1
             post.put()
             self.render("mainpage.html", allPosts=allPosts)
